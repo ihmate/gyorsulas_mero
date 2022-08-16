@@ -56,7 +56,7 @@ if __name__ == '__main__':
     y_data = []
 
     # Set up plot to call animate() function periodically
-    ani = animation.FuncAnimation(fig, animate, fargs=(x_data, y_data), interval=1)
+    ani = animation.FuncAnimation(fig, animate, fargs=(x_data, y_data), interval=1, )
     # NOTE: it is mandatory keep a reference to the animation otherwise it is stopped
     # See: https://matplotlib.org/api/animation_api.html
 

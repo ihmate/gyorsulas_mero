@@ -26,7 +26,10 @@ def printframe(frame, width):
     front_left_wheel = (msg[5] << 8) | msg[4]
     front_left_wheel *= factor
 
+    avarage_speed = (front_right_wheel + front_left_wheel) / 2
+
     print("Front left: ", front_left_wheel, "km/h, Front right: ", front_right_wheel, "km/h")
+    print("Avarage speed: ", avarage_speed)
 
 
 def monitor_channel(channel_number, bitrate, ticktime):
