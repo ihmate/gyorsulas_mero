@@ -2,6 +2,9 @@ import argparse
 import shutil
 
 from canlib import canlib
+from shared_memory_dict import SharedMemoryDict
+
+smd_config = SharedMemoryDict(name='config', size=1024)
 
 bitrates = {
     '1M': canlib.Bitrate.BITRATE_1M,
@@ -30,6 +33,8 @@ def printframe(frame, width):
 
     print("Front left: ", front_left_wheel, "km/h, Front right: ", front_right_wheel, "km/h")
     print("Avarage speed: ", avarage_speed)
+
+    smd_config["status"] = avarage_speed
 
 
 def monitor_channel(channel_number, bitrate, ticktime):
