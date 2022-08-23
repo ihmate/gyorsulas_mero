@@ -37,6 +37,7 @@ def printframe(frame, width):
     smd_config["status"] = avarage_speed
 
 
+
 def monitor_channel(channel_number, bitrate, ticktime):
     ch = canlib.openChannel(channel_number, bitrate=bitrate, flags=canlib.canOPEN_ACCEPT_VIRTUAL)
     ch.setBusOutputControl(canlib.canDRIVER_NORMAL)
