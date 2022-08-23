@@ -1,6 +1,8 @@
 def main():
-	f = open("proba_adat.txt", "a")
-	for i in range(200):
+	f = open("proba_adat2.txt", "a")
+	for i in range(20, 230, 15):
+		f.write(str(i) + "\n")
+	for i in range(230, 50, 35):
 		f.write(str(i) + "\n")
 	f.close()
 

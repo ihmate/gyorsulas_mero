@@ -31,8 +31,8 @@ def printframe(frame, width):
 
     avarage_speed = (front_right_wheel + front_left_wheel) / 2
 
-    print("Front left: ", front_left_wheel, "km/h, Front right: ", front_right_wheel, "km/h")
-    print("Avarage speed: ", avarage_speed)
+    #print("Front left: ", front_left_wheel, "km/h, Front right: ", front_right_wheel, "km/h")
+    #print("Avarage speed: ", avarage_speed)
 
     smd_config["status"] = avarage_speed
 
