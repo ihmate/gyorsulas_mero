@@ -10,7 +10,7 @@ from shared_memory_dict import SharedMemoryDict
 smd_config = SharedMemoryDict(name='config', size=1024)
 
 #name of the .txt file
-file_name = "proba_adat3.txt"
+file_name = "proba_adat.txt"
 
 list = [0, 25, 50, 75, 100, 125, 150, 175, 200, 225, 250]
 
@@ -19,17 +19,17 @@ title_font = {'family':'serif','color':'black','size':20}
 label_font = {'family':'serif','color':'darkred','size':15}
 
 #number of x and y-points -- refresh rate in ms
-ws_ylim = 25
+ws_ylim = 26
 ylim = 50
 xlim = 250
 ms = 100
-wspd_idx = 24
-tspd_idx = 24
+wspd_idx = 25
+tspd_idx = 25
 
 #changing plot color depending on the speed difference
 def plot_color():
     #target_speed color
-    plt.title(f"{int(target_speed[tspd_idx])} KM/H (Target Speed)", fontdict = title_font, loc='left')
+    plt.title(f"{float(target_speed[tspd_idx])} KM/H (Target Speed)", fontdict = title_font, loc='left')
 
     #wheel_speed color 
     if (int(target_speed[tspd_idx]) + 5 > int(wheel_speed[wspd_idx]) and int(target_speed[tspd_idx]) - 5 < int(wheel_speed[wspd_idx])):
@@ -40,7 +40,7 @@ def plot_color():
         line_color = "red"
 
     plt.title(f"{wheel_speed[wspd_idx]:.0f} KM/H (Wheel Speed)", fontdict = title_font, loc='right', c = line_color)
-    ax.plot(wheel_speed, wheel_speed_ypoints, linewidth = '7', color = line_color) 
+    ax.plot(wheel_speed, wheel_speed_ypoints, linewidth = '4', color = line_color) 
 
 # function to update the data
 def my_function(i):
@@ -49,7 +49,7 @@ def my_function(i):
     wheel_speed.append(smd_config["status"])
 
     target_speed.popleft()
-    target_speed.append(int(f.readline().rstrip('\n')))
+    target_speed.append(float(f.readline().rstrip('\n')))
 
     # clear axis
     ax.cla()
@@ -92,6 +92,6 @@ if __name__ == '__main__':
     ax.set_facecolor('#DEDEDE')
 
     # animate
-    ani = FuncAnimation(fig, my_function, interval=ms)
+    ani = FuncAnimation(fig, my_function, interval = ms)
     plt.show()
 

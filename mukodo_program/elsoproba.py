@@ -21,21 +21,19 @@ bitrates = {
 
 def printframe(frame, width):
     factor = 0.0075
-    msg = bytearray(frame.data)
+    
+    if(frame.id == 178):
+        msg = bytearray(frame.data)
 
-    front_right_wheel = (msg[7] << 8) | msg[6]
-    front_right_wheel *= factor
+        front_right_wheel = (msg[7] << 8) | msg[6]
+        front_right_wheel *= factor
 
-    front_left_wheel = (msg[5] << 8) | msg[4]
-    front_left_wheel *= factor
+        front_left_wheel = (msg[5] << 8) | msg[4]
+        front_left_wheel *= factor
 
-    avarage_speed = (front_right_wheel + front_left_wheel) / 2
-
-    #print("Front left: ", front_left_wheel, "km/h, Front right: ", front_right_wheel, "km/h")
-    print("Avarage speed: ", avarage_speed)
-
-    smd_config["status"] = avarage_speed
-
+        avarage_speed = (front_right_wheel + front_left_wheel) / 2
+        print("Avarage speed: ", avarage_speed)
+        smd_config["status"] = avarage_speed
 
 
 def monitor_channel(channel_number, bitrate, ticktime):

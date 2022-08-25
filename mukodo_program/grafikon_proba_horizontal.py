@@ -10,7 +10,7 @@ from shared_memory_dict import SharedMemoryDict
 smd_config = SharedMemoryDict(name='config', size=1024)
 
 #name of the .txt file
-file_name = "proba_adat3.txt"
+file_name = "proba_adat.txt"
 
 speed_list = [0, 25, 50, 75, 100, 125, 150, 175, 200, 225, 250]
 
@@ -40,7 +40,7 @@ def plot_color():
         line_color = "red"
 
     plt.title(f"{wheel_speed[wspd_idx]:.0f} KM/H (Wheel Speed)", fontdict = title_font, loc='right', c = line_color)
-    ax.plot(wheel_speed_ypoints, wheel_speed, linewidth = '7', color = line_color) 
+    ax.plot(wheel_speed_ypoints, wheel_speed, linewidth = '4', color = line_color) 
 
 
 # function to update the data

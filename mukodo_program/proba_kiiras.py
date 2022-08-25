@@ -1,5 +1,5 @@
 def main():
-	f = open("proba_adat3.txt", "a")
+	f = open("proba_adat_mate.txt", "a")
 	for i in range(0, 90):
 		f.write(str(i) + "\n")
 		f.write(str(i) + "\n")
