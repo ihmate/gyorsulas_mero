@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import psutil
 import collections
+import time
 
 from matplotlib.animation import FuncAnimation
 from shared_memory_dict import SharedMemoryDict
@@ -10,7 +11,8 @@ from shared_memory_dict import SharedMemoryDict
 smd_config = SharedMemoryDict(name='config', size=1024)
 
 #name of the .txt file
-file_name = "proba_adat.txt"
+data_file_name = "wltp_data.txt"
+log_file_name = "log_file.txt"
 
 speed_list = [0, 25, 50, 75, 100, 125, 150, 175, 200, 225, 250]
 
@@ -22,14 +24,14 @@ label_font = {'family':'serif','color':'darkred','size':15}
 ylim = 250
 xlim = 50
 ws_xlim = 26
-ms = 100
+ms = 53
 wspd_idx = 25
-tspd_idx = 25
+tspd_idx = 25 #25 - 49 for latency testing
 
 #changing plot color depending on the speed difference
 def plot_color():
     #target_speed color
-    plt.title(f"{int(target_speed[tspd_idx])} KM/H (Target Speed)", fontdict = title_font, loc='left')
+    plt.title(f"{float(target_speed[tspd_idx])} KM/H (Target Speed)", fontdict = title_font, loc='left')
 
     #wheel_speed color 
     if (int(target_speed[tspd_idx]) + 5 > int(wheel_speed[wspd_idx]) and int(target_speed[tspd_idx]) - 5 < int(wheel_speed[wspd_idx])):
@@ -45,12 +47,13 @@ def plot_color():
 
 # function to update the data
 def my_function(i):
+    dt = time.time()
     # get data
     wheel_speed.popleft()
     wheel_speed.append(smd_config["status"])
 
     target_speed.popleft()
-    target_speed.append(int(f.readline().rstrip('\n')))
+    target_speed.append(float(read_data_file.readline().rstrip('\n')))
 
     # clear axis
     ax.cla()
@@ -69,16 +72,22 @@ def my_function(i):
     
     #set title and label texts
     plot_color()
-
-    plt.xlabel(f"{ms} ms", fontdict = label_font)
+    #calculate latency
+    latency = time.time() - dt
+    plt.xlabel(f"{ms} ms + {latency * 1000:.0f} ms latency = {ms + latency * 1000:.0f} ms", fontdict = label_font)
     plt.ylabel("Speed", fontdict = label_font)
 
     plt.grid(color = 'black', linestyle = '--', linewidth = 1)
 
+    #logging latency into file
+    write_log = open(log_file_name, "a")
+    write_log.write(f"{str(latency)} \n")
+    write_log.close()
+
 
 if __name__ == '__main__':
     #open file for reading
-    f = open(file_name, "r")
+    read_data_file = open(data_file_name, "r")
 
     # start collections with zeros and make ypoints for all xpoints
     wheel_speed = collections.deque(np.zeros(ws_xlim))
@@ -96,3 +105,4 @@ if __name__ == '__main__':
     ani = FuncAnimation(fig, my_function, interval=ms)
     plt.show()
 
+    read_data_file.close()

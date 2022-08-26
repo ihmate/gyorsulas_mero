@@ -1,0 +1,5 @@
+﻿  send_msg_proba.cpp
+C:\Users\Mate\source\repos\send_msg_proba\send_msg_proba\send_msg_proba.cpp(27,35): warning C4326: return type of 'main' should be 'int' instead of 'void'
+C:\Users\Mate\source\repos\send_msg_proba\send_msg_proba\send_msg_proba.cpp(35,39): warning C4838: conversion from 'int' to 'char' requires a narrowing conversion
+C:\Users\Mate\source\repos\send_msg_proba\send_msg_proba\send_msg_proba.cpp(35,39): warning C4309: 'initializing': truncation of constant value
+  send_msg_proba.vcxproj -> C:\Users\Mate\source\repos\send_msg_proba\x64\Debug\send_msg_proba.exe
