@@ -50,6 +50,7 @@ def plot_color():
 
 # function to update the data
 def my_function(i):
+    #elso futásnál létrehozni, késöbb már a programból frissül
     n = 0
     if n == 0:
         loop_ido = time.time()
@@ -124,7 +125,7 @@ if __name__ == '__main__':
     fig = plt.figure(figsize=(12,6), facecolor='#DEDEDE')
     ax = plt.subplot()
     ax.set_facecolor('#DEDEDE')
-
+    
     # animate
     ani = FuncAnimation(fig, my_function, cache_frame_data = False, interval = 0)
     plt.show()
