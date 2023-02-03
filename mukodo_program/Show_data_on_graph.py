@@ -11,12 +11,12 @@ smd_config = SharedMemoryDict(name='config', size=1024)
 
 #font style for labels
 title_font = {'family':'serif','color':'black','size':40}
-label_font = {'family':'serif','color':'darkred','size':15}
+label_font = {'family':'serif','color':'darkred','size':20}
 
 #number of x and y-points -- refresh rate in ms -- error margin
 error_margin = 4
 y_lim = 125                     #25-el osztható legyen
-wheel_speed_x_limit = 6         #ezt kell megváltoztatni,hogy hol legyen a "karakter" - scan_idx - egggyel kissebb
+wheel_speed_x_limit = 6        #ezt kell megváltoztatni,hogy hol legyen a "karakter" - scan_idx - egggyel kissebb
 scan_idx = wheel_speed_x_limit - 1
 x_lim = wheel_speed_x_limit * 4
 
@@ -31,23 +31,28 @@ for x in range(0,6):
 #changing plot color depending on the speed difference
 def plot_color():
     #target_speed title and color
-    plt.title(f"{float(target_speed[scan_idx])} KM/H (Target Speed)", fontdict = title_font, loc='left')
+    plt.title(f"{float(target_speed[scan_idx * 2])} KM/H (Target Speed)", fontdict = title_font, loc='left')
 
     #wheel_speed color 
     if (int(target_speed[scan_idx]) + error_margin > int(wheel_speed[scan_idx]) and int(target_speed[scan_idx]) - error_margin < int(wheel_speed[scan_idx])):
         line_color = "green"
-    elif (int(target_speed[scan_idx]) + (error_margin * 1.5) > int(wheel_speed[scan_idx]) and int(target_speed[scan_idx]) - (error_margin * 1.5) < int(wheel_speed[scan_idx])):
+    elif (int(target_speed[scan_idx]) + (error_margin * 2) > int(wheel_speed[scan_idx]) and int(target_speed[scan_idx]) - (error_margin * 2) < int(wheel_speed[scan_idx])):
         line_color = "orange"
     else:
         line_color = "red"
 
     plt.title(f"{wheel_speed[scan_idx]:.0f} KM/H (Wheel Speed)", fontdict = title_font, loc='right', c = line_color, )
-    ax.plot(wheel_speed_xpoints, wheel_speed, linewidth = '4', color = line_color) 
+    ax.plot(wheel_speed_xpoints, wheel_speed, linewidth = '20', color = line_color) 
+
+    # követő vonal létrehozása
+    plt.axvline(x = scan_idx, color = line_color)
 
 
 # function to update the data
 def my_function(i):
-    dt = time.time()
+    n = 0
+    if n == 0:
+        loop_ido = time.time()
 
     # get data
     wheel_speed.popleft()
@@ -62,7 +67,7 @@ def my_function(i):
     ax.set_xlim(0, x_lim)
 
     # plot target_speed
-    ax.plot(target_speed_xpoints, target_speed, linewidth = '30')
+    ax.plot(target_speed_xpoints, target_speed, linewidth = '80')
 
     # x tengely számozása és azoknak helyeinek kialakítása
     time_number_list = [
@@ -77,15 +82,18 @@ def my_function(i):
     ax.set_yticks(speed_list, speed_list)
     ax.set_xticks(time_tick_list, time_number_list)
     ax.yaxis.tick_right()
-    ax.tick_params(axis='y', colors='darkred', size = 10)
+    ax.tick_params(axis='both', which='major', labelsize=25)
+    ax.tick_params(axis='y', colors='darkred', size = 50)
 
     #színek beállítása
     plot_color()
 
     #calculate latency and wait for predetermined ms
-    latency = time.time() - dt
+    latency = time.time() - loop_ido
     while((latency * 1000) < ms):
-        latency = time.time() - dt
+        latency = time.time() - loop_ido
+
+    loop_ido = time.time()
 
     plt.xlabel(f"Latency: {latency * 1000:.0f} ms", fontdict = label_font)
     plt.ylabel("Speed", fontdict = label_font)
@@ -96,6 +104,7 @@ def my_function(i):
     write_log = open("./log_fajlok/" + log_file_name + ".txt", "a")
     write_log.write(f"{str(wheel_speed[wheel_speed_x_limit - 1])} \n")
     write_log.close()
+    n += 1
 
 if __name__ == '__main__':
     #paraméterek kiolvasása a menüből (log fájl neve , késleltetés ideje)
@@ -117,7 +126,7 @@ if __name__ == '__main__':
     ax.set_facecolor('#DEDEDE')
 
     # animate
-    ani = FuncAnimation(fig, my_function, cache_frame_data = False)
+    ani = FuncAnimation(fig, my_function, cache_frame_data = False, interval = 0)
     plt.show()
 
     read_data_file.close()

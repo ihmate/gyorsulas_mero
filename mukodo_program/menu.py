@@ -33,7 +33,7 @@ def mintavetelezesi_gyakorisag(window):
 
    Mintavetelezesi_gyakorisag = tk.StringVar()
 
-   Timing_input = tk.Spinbox(window, width = 71, from_=1, to=300, textvariable = Mintavetelezesi_gyakorisag)
+   Timing_input = tk.Spinbox(window, width = 71, from_=100, to=300, textvariable = Mintavetelezesi_gyakorisag)
    Timing_input.grid(row = 2, column = 1, sticky = 'w')
 
    return Mintavetelezesi_gyakorisag
