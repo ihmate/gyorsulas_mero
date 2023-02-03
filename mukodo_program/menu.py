@@ -51,7 +51,7 @@ def start():
    Mintavetelezesi_gyakorisag = mintavetelezesi_gyakorisag(window)
 
    # Create Start button
-   btn = Button(window, text = 'Program indítása!', bd = '5', command = window.destroy).grid(row = 3, column = 0, columnspan = 2, sticky = 'n') 
+   Button(window, text = 'Program indítása!', bd = '5', command = window.destroy).grid(row = 3, column = 0, columnspan = 2, sticky = 'n') 
 
    window.mainloop()
 
