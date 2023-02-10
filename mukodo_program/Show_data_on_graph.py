@@ -2,9 +2,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import collections
 import time
+import sys 
 import gyorsulas_menu as menu
 from matplotlib.animation import FuncAnimation
 from shared_memory_dict import SharedMemoryDict
+import Can_data_reader
+from multiprocessing import Process
+
+from canlib import canlib
 
 #shared memory for wheel_speed data
 smd_config = SharedMemoryDict(name='config', size=1024)
@@ -15,14 +20,28 @@ y_lim = 125                     #25-el osztható legyen
 wheel_speed_x_limit = 6        #ezt kell megváltoztatni,hogy hol legyen a "karakter" - scan_idx - egggyel kissebb
 scan_idx = wheel_speed_x_limit - 1
 x_lim = wheel_speed_x_limit * 4
+futas_darab_szam = 0
 
-#tengelyek listáinka feltöltése
+#tengelyek listáinak létrehozása és feltöltése
 speed_list = []
 time_tick_list = []
 
 for x in range(0,6):
     speed_list.append(x * 25)
     time_tick_list.append(x * scan_idx)
+
+
+#megállítás és kilépés
+def on_press(event):
+    if event.key.isspace():
+        if anim.running:
+            anim.event_source.stop()
+        else:
+            anim.event_source.start()
+        anim.running ^= True
+    elif event.key == 'q':
+        anim.event_source.stop()
+        sys.exit("Kilepes gomb")  
 
 
 def plot_color():
@@ -34,7 +53,7 @@ def plot_color():
     else:
         line_color = "red"
 
-    #target_speed and wheel_speed title color
+    #target_speed-(left) and wheel_speed-(right) title color and position
     plt.title(f"{float(target_speed[scan_idx * 2])} KM/H (Target Speed)", size = 40, loc='left')
     plt.title(f"{wheel_speed[scan_idx]:.0f} KM/H (Wheel Speed)", size = 40, loc='right', c = line_color, )
 
@@ -43,11 +62,10 @@ def plot_color():
     plt.axvline(x = scan_idx, color = line_color)
 
 
-futas_darab_szam = 1
-
 # function to update the data
-def my_function(i, kezdes_ido):
+def my_function(i, kezdes_ido, time_number_list):
     global futas_darab_szam
+    futas_darab_szam = futas_darab_szam + 1
 
     # get data
     wheel_speed.popleft()
@@ -64,15 +82,6 @@ def my_function(i, kezdes_ido):
     # plot target_speed
     ax.plot(target_speed_xpoints, target_speed, linewidth = '80')
 
-    # x tengely számozása és azoknak helyeinek kialakítása
-    time_number_list = [
-        f"-{ms * scan_idx / 1000} s"
-        ]
-    for x in range(0,5):
-        time_number_list.append(
-            f"+{(x * ms * scan_idx) / 1000} s"
-        )
-
     # tengely tickek létrehozása, beállítása
     ax.set_yticks(speed_list, speed_list)
     ax.set_xticks(time_tick_list, time_number_list)
@@ -83,28 +92,30 @@ def my_function(i, kezdes_ido):
     #színek beállítása
     plot_color()
 
-    #calculate latency and wait for predetermined ms
+    #calculate latency and wait for predetermined ms - a loop futásának darabszámával visszaosztva az egységnyi idő kiszámolására
     latency = time.time() - kezdes_ido
     while((latency * 1000)/futas_darab_szam < ms):
         latency = time.time() - kezdes_ido
 
-    plt.xlabel(f"Latency: {(latency/futas_darab_szam) * 1000:.0f} ms || kezdés idő: {kezdes_ido:.3f} || n:{futas_darab_szam}", size = 20)
+    plt.xlabel(f"Latency: {(latency/futas_darab_szam) * 1000:.0f} ms || Pause: 'SPACE' || QUIT: 'Q'", size = 20)
     plt.ylabel("Speed", size = 20)
-
     plt.grid(color = 'black', linestyle = '--', linewidth = 1)
 
     #logging wheel speed into file
     write_log = open("./log_fajlok/" + log_file_name + ".txt", "a")
     write_log.write(f"{str(wheel_speed[wheel_speed_x_limit - 1])} \n")
     write_log.close()
-    futas_darab_szam = futas_darab_szam + 1
+
 
 if __name__ == '__main__':
-    #paraméterek kiolvasása a menüből (log fájl neve , késleltetés ideje)
-    data_file_name, log_file_name, ms = menu.start()
+    #processként a beolvasás futtatása
+    p1 = Process(target=Can_data_reader.monitor_channel, args=(0, canlib.Bitrate.BITRATE_500K, 0, ))
+    p1.daemon = True #azért, hogy leálljon a programmal együtt a process
+    p1.start()
 
-    #open file for reading
-    read_data_file = open(data_file_name, "r")
+    #paraméterek kiolvasása a menüből (log fájl neve , késleltetés ideje) 
+    data_file_name, log_file_name, ms = menu.start()    
+    read_data_file = open(data_file_name, "r")  #open file for reading
 
     # start collections with zeros and make xpoints for all ypoints
     wheel_speed = collections.deque(np.zeros(wheel_speed_x_limit))
@@ -118,8 +129,24 @@ if __name__ == '__main__':
     ax = plt.subplot()
     ax.set_facecolor('#DEDEDE')
     kezdes_ido = time.time()
-    # animate
-    ani = FuncAnimation(fig, my_function, cache_frame_data = False, interval = 0, fargs=(kezdes_ido,))
-    plt.show()
 
+    # x tengely számozása és azoknak helyeinek kialakítása
+    time_number_list = [
+        f"-{ms * scan_idx / 1000} s"
+        ]
+    for x in range(0,5):
+        time_number_list.append(
+            f"+{(x * ms * scan_idx) / 1000} s"
+        )
+    
+    #billentyű lenyomások érzékelése
+    fig.canvas.mpl_connect('key_press_event', on_press)
+
+    # animate - fargs: paraméterek átadása
+    anim = FuncAnimation(fig, my_function, cache_frame_data = False, interval = 0, fargs=(kezdes_ido,time_number_list,))
+
+    anim.running = True
+    anim.direction = +1
+
+    plt.show()
     read_data_file.close()
