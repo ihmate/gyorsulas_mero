@@ -1,18 +1,17 @@
+import multiprocessing
 import matplotlib.pyplot as plt
 import numpy as np
 import collections
 import time
 import sys 
-import gyorsulas_menu as menu
-from matplotlib.animation import FuncAnimation
-from shared_memory_dict import SharedMemoryDict
-import Can_data_reader
-from multiprocessing import Process
-
 from canlib import canlib
+from matplotlib.animation import FuncAnimation
+from multiprocessing import Process
+import gyorsulas_menu as menu
+import Can_data_reader
 
 #shared memory for wheel_speed data
-smd_config = SharedMemoryDict(name='config', size=1024)
+#smd_config = SharedMemoryDict(name='config', size=1024)
 
 #number of x and y-points -- refresh rate in ms -- error margin
 error_margin = 4                #színváltáshoz
@@ -21,6 +20,7 @@ wheel_speed_x_limit = 6        #ezt kell megváltoztatni,hogy hol legyen a "kara
 scan_idx = wheel_speed_x_limit - 1
 x_lim = wheel_speed_x_limit * 4
 futas_darab_szam = 0
+shared_value = multiprocessing.Value('d', 0.0)  #processek között megosztott változó
 
 #tengelyek listáinak létrehozása és feltöltése
 speed_list = []
@@ -42,7 +42,7 @@ def on_press(event):
     elif event.key == 'q':
         anim.event_source.stop()
         sys.exit("Kilepes gomb")  
-
+        
 
 def plot_color():
     #wheel_speed and title color 
@@ -69,7 +69,7 @@ def my_function(i, kezdes_ido, time_number_list):
 
     # get data
     wheel_speed.popleft()
-    wheel_speed.append(smd_config["status"])
+    wheel_speed.append(shared_value.value)
 
     target_speed.popleft()
     target_speed.append(float(read_data_file.readline().rstrip('\n')))
@@ -108,8 +108,8 @@ def my_function(i, kezdes_ido, time_number_list):
 
 
 if __name__ == '__main__':
-    #processként a beolvasás futtatása
-    p1 = Process(target=Can_data_reader.monitor_channel, args=(0, canlib.Bitrate.BITRATE_500K, 0, ))
+    #processként a beolvasás futtatása || megosztott változó átadásával
+    p1 = Process(target=Can_data_reader.monitor_channel, args=(0, canlib.Bitrate.BITRATE_500K, 0, shared_value, ))
     p1.daemon = True #azért, hogy leálljon a programmal együtt a process
     p1.start()
 
