@@ -1,8 +1,5 @@
-#import argparse
 import shutil
-
 from canlib import canlib
-from shared_memory_dict import SharedMemoryDict
 
 
 def printframe(frame, width, shared_value):
@@ -22,8 +19,9 @@ def printframe(frame, width, shared_value):
         shared_value.value = avarage_speed
 
 
-def monitor_channel(channel_number, bitrate, ticktime, shared_value):
-    ch = canlib.openChannel(channel_number, bitrate=bitrate, flags=canlib.canOPEN_ACCEPT_VIRTUAL)
+def monitor_channel(shared_value):
+    ticktime = 0
+    ch = canlib.openChannel(0, bitrate = canlib.Bitrate.BITRATE_500K, flags=canlib.canOPEN_ACCEPT_VIRTUAL)
     ch.setBusOutputControl(canlib.canDRIVER_NORMAL)
     ch.busOn()
 

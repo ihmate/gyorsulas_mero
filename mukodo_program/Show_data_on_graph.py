@@ -4,7 +4,6 @@ import numpy as np
 import collections
 import time
 import sys 
-from canlib import canlib
 from matplotlib.animation import FuncAnimation
 from multiprocessing import Process
 import gyorsulas_menu as menu
@@ -117,8 +116,9 @@ def my_function(i, kezdes_ido, speed_list, time_tick_list, time_number_list):
 
 
 if __name__ == '__main__':
+    multiprocessing.freeze_support()
     #processként a beolvasás futtatása || megosztott változó átadásával
-    p1 = Process(target=Can_data_reader.monitor_channel, args=(0, canlib.Bitrate.BITRATE_500K, 0, shared_value, ))
+    p1 = Process(target=Can_data_reader.monitor_channel, args=(shared_value, ))
     p1.daemon = True #azért, hogy leálljon a programmal együtt a process
     p1.start()
 
