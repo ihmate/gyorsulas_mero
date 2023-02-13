@@ -43,7 +43,7 @@ def start():
    # creating window and setting attributes
    window = tk.Tk()
    window.state('zoomed')
-   window.title("Hőmérés")
+   window.title("WLTP mérés")
 
    #creating components
    wltp_fajl = wltp_files(window, getFolder())

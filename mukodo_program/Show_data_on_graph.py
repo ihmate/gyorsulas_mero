@@ -10,9 +10,6 @@ from multiprocessing import Process
 import gyorsulas_menu as menu
 import Can_data_reader
 
-#shared memory for wheel_speed data
-#smd_config = SharedMemoryDict(name='config', size=1024)
-
 #number of x and y-points -- refresh rate in ms -- error margin
 error_margin = 4                #színváltáshoz
 y_lim = 125                     #25-el osztható legyen
@@ -22,14 +19,26 @@ x_lim = wheel_speed_x_limit * 4
 futas_darab_szam = 0
 shared_value = multiprocessing.Value('d', 0.0)  #processek között megosztott változó
 
-#tengelyek listáinak létrehozása és feltöltése
-speed_list = []
-time_tick_list = []
+def lista_feltoltes(ms):
+    #tengelyek listáinak létrehozása
+    speed_list = []
+    time_tick_list = []
+    time_number_list = []
 
-for x in range(0,6):
-    speed_list.append(x * 25)
-    time_tick_list.append(x * scan_idx)
+    #helyek, értékek meghatározása
+    for x in range(0,6):
+        speed_list.append(x * 25)
+        time_tick_list.append(x * scan_idx)
 
+    # x tengely számozása és azoknak helyeinek kialakítása
+    time_number_list = [
+        f"-{ms * scan_idx / 1000} s"
+        ]
+    for x in range(0,5):
+        time_number_list.append(
+            f"+{(x * ms * scan_idx) / 1000} s"
+        )
+    return speed_list, time_tick_list, time_number_list
 
 #megállítás és kilépés
 def on_press(event):
@@ -55,7 +64,7 @@ def plot_color():
 
     #target_speed-(left) and wheel_speed-(right) title color and position
     plt.title(f"{float(target_speed[scan_idx * 2])} KM/H (Target Speed)", size = 40, loc='left')
-    plt.title(f"{wheel_speed[scan_idx]:.0f} KM/H (Wheel Speed)", size = 40, loc='right', c = line_color, )
+    plt.title(f"{wheel_speed[scan_idx]:.0f} KM/H (Wheel Speed)", size = 40, loc='right', c = line_color)
 
     # wheel_speed plotolása és színezése || függőleges vonal behúzása és színezése
     ax.plot(wheel_speed_xpoints, wheel_speed, linewidth = '20', color = line_color) 
@@ -63,7 +72,7 @@ def plot_color():
 
 
 # function to update the data
-def my_function(i, kezdes_ido, time_number_list):
+def my_function(i, kezdes_ido, speed_list, time_tick_list, time_number_list):
     global futas_darab_szam
     futas_darab_szam = futas_darab_szam + 1
 
@@ -130,23 +139,18 @@ if __name__ == '__main__':
     ax.set_facecolor('#DEDEDE')
     kezdes_ido = time.time()
 
-    # x tengely számozása és azoknak helyeinek kialakítása
-    time_number_list = [
-        f"-{ms * scan_idx / 1000} s"
-        ]
-    for x in range(0,5):
-        time_number_list.append(
-            f"+{(x * ms * scan_idx) / 1000} s"
-        )
+    #listák létrehozása és feltöltése
+    speed_list, time_tick_list, time_number_list = lista_feltoltes(ms)
     
     #billentyű lenyomások érzékelése
     fig.canvas.mpl_connect('key_press_event', on_press)
 
     # animate - fargs: paraméterek átadása
-    anim = FuncAnimation(fig, my_function, cache_frame_data = False, interval = 0, fargs=(kezdes_ido,time_number_list,))
+    anim = FuncAnimation(fig, my_function, cache_frame_data = False, interval = 0, fargs=(kezdes_ido,speed_list, time_tick_list, time_number_list,))
 
     anim.running = True
     anim.direction = +1
 
     plt.show()
     read_data_file.close()
+    p1.join()
