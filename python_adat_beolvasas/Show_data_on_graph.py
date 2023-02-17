@@ -6,8 +6,6 @@ import time
 import sys 
 from matplotlib.animation import FuncAnimation
 from multiprocessing import Process
-#import gyorsulas_menu as menu
-#import Can_data_reader
 import shutil
 from canlib import canlib
 import tkinter as tk
@@ -113,7 +111,7 @@ def mintavetelezesi_gyakorisag(window):
    return Mintavetelezesi_gyakorisag
 
 
-def start(): 
+def menu_start(): 
    # creating window and setting attributes
    window = tk.Tk()
    window.state('zoomed')
@@ -232,13 +230,12 @@ def my_function(i, kezdes_ido, speed_list, time_tick_list, time_number_list):
 if __name__ == '__main__':
     multiprocessing.freeze_support()
     #processként a beolvasás futtatása || megosztott változó átadásával
-    #p1 = Process(target=Can_data_reader.monitor_channel, args=(shared_value, ))
     p1 = Process(target=monitor_channel, args=(shared_value, ))
     p1.daemon = True #azért, hogy leálljon a programmal együtt a process
     p1.start()
 
     #paraméterek kiolvasása a menüből (log fájl neve , késleltetés ideje) 
-    data_file_name, log_file_name, ms = start()    
+    data_file_name, log_file_name, ms = menu_start()    
     read_data_file = open(data_file_name, "r")  #open file for reading
 
     # start collections with zeros and make xpoints for all ypoints
